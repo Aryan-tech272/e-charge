@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E CHARGE | EV Charging Network</title>
+<style>
+:root{
+  --bg:#030a12;
+  --panel:#0a1622;
+  --panel2:#0f2030;
+  --line:#203747;
+  --green:#63ff83;
+  --cyan:#38e8d0;
+  --text:#f3f8ff;
+  --muted:#9aafc2;
+  --red:#ff737e;
+  --yellow:#ffd477;
+  --glow:0 0 24px #63ff8320;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:
+    radial-gradient(ellipse at 75% 0%,#102a43 0,transparent 38%),
+    radial-gradient(ellipse at 5% 30%,#09231f 0,transparent 32%),
+    var(--bg);
+  color:var(--text);
+  font-family:Inter,"Segoe UI",Arial,sans-serif;
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;transition:background .2s,border-color .2s,transform .2s,box-shadow .2s}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid var(--green);outline-offset:3px
+}
+::selection{background:var(--green);color:#03100a}
+.app{display:flex;min-height:100vh}
+.sidebar{
+  width:245px;position:fixed;inset:0 auto 0 0;
+  background:rgba(3,11,19,.94);
+  backdrop-filter:blur(22px);
+  border-right:1px solid var(--line);
+  padding:24px 15px;display:flex;flex-direction:column;z-index:5
+}
+.brand{display:flex;align-items:center;gap:11px;padding:4px 8px 27px}
+.logo {
+  width: 43px;
+  height: 43px;
+  border-radius: 14px;
+  background: transparent;
+  color: #03120c;
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+  font-weight: 900;
+  box-shadow: none;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.brand strong{font-size:18px;letter-spacing:2px}
+.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:1.7px;margin-top:5px}
+.nav-label{color:#607b8e;font-size:10px;letter-spacing:2px;padding:12px 12px 9px}
+.nav{display:grid;gap:6px}
+.nav button{
+  width:100%;border:1px solid transparent;background:transparent;
+  color:#9bb0c2;padding:12px 13px;border-radius:11px;text-align:left;
+  display:flex;align-items:center;gap:12px;font-size:13px
+}
+.nav button .ico{width:21px;text-align:center;font-size:19px;color:var(--cyan)}
+.nav button:hover,.nav button.active{
+  background:linear-gradient(100deg,#123328,#102438);
+  color:var(--green);border-color:#285642;
+  box-shadow:inset 3px 0 var(--green),0 0 18px #63ff8309
+}
+.side-bottom{
+  margin-top:auto;padding:14px 10px;border:1px solid var(--line);
+  border-radius:13px;background:#091521;color:var(--muted);
+  font-size:11px;line-height:1.7
+}
+.side-bottom b{color:var(--green)}
+.main{margin-left:245px;width:calc(100% - 245px);min-width:0}
+.topbar{
+  min-height:75px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;gap:15px;
+  background:rgba(4,13,23,.82);backdrop-filter:blur(20px);
+  position:sticky;top:0;z-index:4
+}
+.crumb{color:var(--muted);font-size:12px}
+.crumb b{color:var(--text);font-size:14px}
+.top-actions{display:flex;gap:10px;align-items:center}
+.pill{
+  border:1px solid var(--line);background:#0c1b29;
+  border-radius:30px;padding:9px 13px;color:#c4d5e4;font-size:11px
+}
+.online-dot{
+  display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:var(--green);margin-right:6px;
+  box-shadow:0 0 10px var(--green)
+}
+.content{max-width:1450px;margin:auto;padding:30px 32px 55px}
+.page{display:none;animation:appear .25s ease}
+.page.active{display:block}
+@keyframes appear{
+  from{opacity:0;transform:translateY(7px)}
+  to{opacity:1;transform:translateY(0)}
+}
+h1{font-size:clamp(28px,3vw,42px);margin:0 0 10px;letter-spacing:-1.5px;line-height:1.12}
+h2{font-size:19px;margin:0 0 16px;letter-spacing:-.3px}
+h3{font-size:15px;margin:0 0 8px}
+p{color:var(--muted);line-height:1.7;font-size:13px}
+.eyebrow{
+  color:var(--green);font-size:10px;letter-spacing:2.3px;
+  font-weight:800;margin-bottom:13px
+}
+.sub{max-width:700px;margin:0 0 25px}
+.grid{display:grid;gap:16px}
+.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin:22px 0}
+.card{
+  position:relative;overflow:hidden;min-width:0;
+  background:linear-gradient(145deg,rgba(14,30,45,.96),rgba(7,19,30,.97));
+  border:1px solid var(--line);border-radius:17px;padding:20px;
+  box-shadow:0 8px 28px #00000012;
+  transition:border-color .22s,transform .22s,box-shadow .22s
+}
+.stat-label{font-size:11px;color:var(--muted)}
+.stat-value{font-size:28px;font-weight:800;margin:12px 0 6px;letter-spacing:-1px}
+.stat-note{font-size:10px;color:var(--green)}
+.stats .card:before{
+  content:"";position:absolute;top:0;left:20px;right:20px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.5
+}
+.hero{
+  position:relative;overflow:hidden;
+  background:
+    radial-gradient(ellipse at 82% 50%,#14504470,transparent 37%),
+    radial-gradient(ellipse at 70% 15%,#153e6370,transparent 45%),
+    linear-gradient(120deg,#071522,#0a1a29 60%,#0b2b2a);
+  border:1px solid #245143;border-radius:22px;
+  padding:35px;display:grid;grid-template-columns:1.2fr .8fr;
+  gap:20px;align-items:center;
+  box-shadow:inset 0 0 50px #38e8d008,0 12px 45px #00000020
+}
+.hero:before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.22;
+  background:repeating-linear-gradient(120deg,transparent 0 45px,#38e8d014 46px,#38e8d014 47px,transparent 48px 90px)
+}
+.hero h1{position:relative;font-size:clamp(34px,4vw,52px);line-height:1.06;max-width:600px}
+.hero h1 span{
+  color:var(--green);
+  text-shadow:0 0 28px #63ff8340
+}
+.hero p{position:relative;max-width:520px;font-size:14px}
+.hero-art{display:grid;place-items:center;min-height:190px;position:relative}
+.big-bolt{
+  width:155px;height:155px;border-radius:42px;
+  border:1px solid #43a994;
+  background:linear-gradient(145deg,#103e39,#10273b);
+  display:grid;place-items:center;font-size:86px;color:var(--green);
+  transform:rotate(-5deg);
+  box-shadow:0 0 35px #38e8d01b,0 0 75px #63ff8318,inset 0 0 30px #38e8d012;
+  animation:boltGlow 4s ease-in-out infinite
+}
+@keyframes boltGlow{
+  0%,100%{box-shadow:0 0 25px #38e8d018,0 0 55px #63ff8310}
+  50%{box-shadow:0 0 40px #38e8d035,0 0 85px #63ff8325}
+}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.btn{
+  border:1px solid #294253;background:#102131;color:var(--text);
+  border-radius:10px;padding:11px 15px;font-size:12px;font-weight:700
+}
+.btn:hover{border-color:var(--cyan);box-shadow:0 0 17px #38e8d018;transform:translateY(-1px)}
+.btn.primary{
+  background:linear-gradient(110deg,#63ff83,#a5ff9d);
+  border-color:var(--green);color:#06150b;
+  box-shadow:0 0 20px #63ff831b
+}
+.btn.primary:hover{box-shadow:0 0 28px #63ff8350;filter:brightness(1.04)}
+.btn.secondary{background:rgba(4,14,23,.48);border-color:#476273}
+.btn.danger{color:var(--red)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.quick-grid{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:16px}
+.quick{cursor:pointer;transition:.22s}
+.quick:hover{
+  border-color:#3b8c70;transform:translateY(-3px);
+  box-shadow:0 12px 30px #0003,0 0 20px #63ff830b
+}
+.quick-icon{
+  font-size:25px;margin-bottom:17px;color:var(--green);
+  filter:drop-shadow(0 0 8px #63ff8335)
+}
+.quick h3{margin-bottom:5px}
+.quick p{font-size:11px;margin:0}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:27px 0 14px}
+.section-head h2{margin:0}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.field{display:flex;flex-direction:column;gap:7px;min-width:0}
+.field label{font-size:11px;color:#bfd0df}
+.field input,.field select,.field textarea{
+  width:100%;min-width:0;background:#06111d;border:1px solid #294253;
+  color:var(--text);padding:12px;border-radius:9px;transition:border-color .2s,box-shadow .2s
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--cyan);box-shadow:0 0 0 3px #38e8d010;outline:none
+}
+.field textarea{min-height:95px;resize:vertical}
+.field input::placeholder,.field textarea::placeholder{color:#637b8f}
+.field select option{background:#0a1622;color:var(--text)}
+.full{grid-column:1/-1}
+.filters{grid-template-columns:repeat(5,minmax(0,1fr));margin-bottom:17px}
+.filter-card{padding:12px}
+.filter-card label{font-size:10px}
+.charger-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.charger-card{padding:0;overflow:hidden}
+.charger-card:after{
+  content:"";position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--cyan),var(--green),transparent);opacity:.7
+}
+.charger-card:hover{border-color:#397d68;box-shadow:0 12px 35px #0003,0 0 22px #38e8d009}
+.charger-top{padding:18px 18px 12px;display:flex;justify-content:space-between;gap:10px}
+.charger-icon{
+  width:39px;height:39px;
+  background:linear-gradient(145deg,#153d3a,#122a40);
+  border:1px solid #28594e;border-radius:12px;
+  display:grid;place-items:center;font-size:21px;color:var(--green);
+  box-shadow:0 0 15px #63ff8310
+}
+.charger-body{padding:0 18px 18px}
+.charger-body p{margin:7px 0 13px}
+.tag{
+  display:inline-block;background:#10332d;border:1px solid #24574a;
+  color:#9bffb0;padding:5px 8px;border-radius:7px;font-size:10px;margin:3px 3px 3px 0
+}
+.tag.gray{color:#b5c9d8;border-color:#304352;background:#142330}
+.status{font-size:10px;padding:6px 9px;border-radius:20px;white-space:nowrap;height:max-content}
+.status.good{background:#12382b;color:var(--green);border:1px solid #246447}
+.status.bad{background:#3a202a;color:var(--red);border:1px solid #67333d}
+.status.warn{background:#392f1c;color:var(--yellow);border:1px solid #5a4a2a}
+.row-between{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.price{font-weight:800;font-size:18px}
+.price small{font-weight:400;font-size:10px;color:var(--muted)}
+.muted{color:var(--muted)}
+.empty{
+  border:1px dashed #304c5b;border-radius:13px;padding:28px;
+  text-align:center;color:var(--muted);font-size:13px;grid-column:1/-1;
+  background:#07131d
+}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:560px}
+th,td{padding:13px 12px;border-bottom:1px solid var(--line);text-align:left}
+th{font-size:10px;color:var(--muted);font-weight:600}
+tbody tr:hover{background:#122536}
+.two-col{grid-template-columns:1fr 1fr}
+.map-box{
+  background:
+    radial-gradient(circle at 30% 40%,#1a594a30,transparent 30%),
+    radial-gradient(ellipse at 55% 40%,#12354a,#081522 70%);
+  border:1px solid #294453;border-radius:15px;padding:20px;
+  min-height:170px;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center
+}
+.map-pin{font-size:35px;color:var(--green);filter:drop-shadow(0 0 12px #63ff8350)}
+.big-number{font-size:35px;font-weight:800;color:var(--green);margin:8px 0;text-shadow:0 0 20px #63ff8315}
+.notice{
+  border:1px solid #285844;background:#10271f;color:#c3f2d1;
+  padding:13px;border-radius:10px;font-size:11px;line-height:1.6;margin:12px 0
+}
+.notice.warning{border-color:#58492d;background:#2b2417;color:#f1d79a}
+.session-progress{height:9px;background:#1c3040;border-radius:20px;overflow:hidden;margin:16px 0;width:100%}
+.session-progress div{
+  height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));
+  width:0;transition:width .3s;box-shadow:0 0 12px #63ff8370
+}
+.rating{font-size:22px;color:var(--yellow);letter-spacing:4px}
+.modal{
+  display:none;position:fixed;inset:0;background:#000c;z-index:20;
+  align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)
+}
+.modal.open{display:flex}
+.modal-box{
+  width:min(420px,100%);
+  background:linear-gradient(145deg,#102234,#07131f);
+  border:1px solid #355363;border-radius:18px;padding:24px;
+  box-shadow:0 20px 80px #0008,0 0 35px #38e8d00b
+}
+.toast{
+  position:fixed;right:20px;bottom:25px;
+  background:linear-gradient(110deg,var(--green),#c3ffae);color:#07150a;
+  padding:13px 18px;border-radius:11px;font-size:12px;font-weight:800;
+  z-index:50;display:none;max-width:calc(100% - 40px);
+  box-shadow:0 8px 35px #0005,0 0 20px #63ff8320
+}
+footer{margin-top:35px;padding-top:18px;border-top:1px solid var(--line);font-size:10px;color:#71899a}
+.mobile-nav{display:none}
+.hidden{display:none!important}
+input[type="checkbox"]{accent-color:var(--green)}
+@media(max-width:1100px){
+  .sidebar{width:205px}
+  .main{margin-left:205px;width:calc(100% - 205px)}
+  .quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .filters{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .content{padding:24px 20px}
+}
+@media(max-width:720px){
+  .sidebar{display:none}
+  .main{margin:0;width:100%;padding-bottom:76px}
+  .topbar{height:62px;min-height:62px;padding:0 16px}
+  .content{padding:19px 14px 30px}
+  .hero{grid-template-columns:1fr;padding:23px}
+  .hero-art{display:none}
+  .stats{gap:9px}
+  .card{padding:15px}
+  .stat-value{font-size:24px}
+  .charger-grid,.two-col{grid-template-columns:1fr}
+  .filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .form-grid{grid-template-columns:1fr}
+  .full{grid-column:auto}
+  .quick-grid{gap:10px}
+  .quick{padding:14px}
+  .quick-icon{margin-bottom:9px}
+  .section-head{align-items:flex-start}
+  .pill.hide-mobile{display:none}
+  .mobile-nav{
+    position:fixed;bottom:0;left:0;right:0;display:grid;
+    grid-template-columns:repeat(5,1fr);gap:2px;padding:7px 5px calc(7px + env(safe-area-inset-bottom));
+    background:rgba(4,13,23,.96);backdrop-filter:blur(20px);
+    border-top:1px solid var(--line);z-index:10
+  }
+  .mobile-nav button{
+    background:transparent;border:0;border-radius:9px;color:#8da5b7;
+    font-size:9px;padding:7px 1px;display:flex;align-items:center;gap:4px;flex-direction:column
+  }
+  .mobile-nav button span{font-size:19px}
+  .mobile-nav button.active{color:var(--green);background:#123126}
+  .top-actions .pill:first-child{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}
+}
+.hero-charging-image {
+  width: 100%;
+  max-width: 425px;
+  height: 200px;
+  object-fit: contain;
+  border-radius: 30px;
+  display: block;
+  margin: auto;
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand">
+    <div class="logo">
+  <img src="ech-logo.png" alt="E CHARGE logo">
+</div>
+    <div><strong>E CHARGE</strong><small>PLUG IN • DRIVE FURTHER</small></div>
+  </div>
+  <div class="nav-label">WORKSPACE</div>
+  <nav class="nav" id="sideNav">
+    <button class="active" data-page="dashboard"><span class="ico">▦</span>Dashboard</button>
+    <button data-page="chargers"><span class="ico">⌖</span>Find Chargers</button>
+    <button data-page="trip"><span class="ico">➤</span>Trip Planner</button>
+    <button data-page="bookings"><span class="ico">▤</span>My Bookings</button>
+    <button data-page="session"><span class="ico">ϟ</span>Charging Session</button>
+    <button data-page="favorites"><span class="ico">♡</span>Favorites</button>
+    <button data-page="owner"><span class="ico">⌂</span>List a Charger</button>
+    <button data-page="reviews"><span class="ico">☆</span>Reviews & Feedback</button>
+    <button data-page="profile"><span class="ico">◉</span>Profile & Settings</button>
+  </nav>
+  <div class="side-bottom"><b>● Network demo</b><br>Charger data is provided by your local server. Physical charger status is not connected.</div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+  <div class="crumb">E CHARGE / <b id="pageTitle">Dashboard</b></div>
+  <div class="top-actions">
+    <span class="pill"><span class="online-dot"></span><span id="serverStatus">Connecting…</span></span>
+    <button class="btn" onclick="openLogin()">◉ <span id="accountLabel">Sign in</span></button>
+  </div>
+</header>
+
+<div class="content">
+<!-- DASHBOARD -->
+<section class="page active" id="page-dashboard">
+  <div class="eyebrow">YOUR ELECTRIC JOURNEY STARTS HERE</div>
+  <div class="hero">
+    <div>
+      <h1>Charge smarter.<br><span>Go further.</span></h1>
+      <p>Discover charging stations, plan your route, reserve a charger and keep your EV journey moving.</p>
+      <div class="actions">
+        <button class="btn primary" onclick="navigate('chargers')">⌖ Find a charger</button>
+        <button class="btn secondary" onclick="navigate('trip')">➤ Plan a trip</button>
+      </div>
+    </div>
+    <div class="hero-art">
+  <img
+    src="/Neon%20EV%20Charging%20Station%20at%20Sunset.png"
+    alt="Electric car charging at E CHARGE station"
+    class="hero-charging-image"
+  >
+</div>
+  </div>
+  <div class="grid stats">
+    <div class="card"><div class="stat-label">Stations listed</div><div class="stat-value" id="statStations">—</div><div class="stat-note">Across the demo network</div></div>
+    <div class="card"><div class="stat-label">Connectors available</div><div class="stat-value" id="statFree">—</div><div class="stat-note">Based on current demo data</div></div>
+    <div class="card"><div class="stat-label">Your bookings</div><div class="stat-value" id="statBookings">0</div><div class="stat-note">Saved on this server session</div></div>
+    <div class="card"><div class="stat-label">Favorites</div><div class="stat-value" id="statFavorites">0</div><div class="stat-note">Saved in this browser</div></div>
+  </div>
+  <div class="section-head"><h2>Everything in one place</h2><span class="muted" style="font-size:11px">Tap to open a feature ↗</span></div>
+  <div class="grid quick-grid">
+    <div class="card quick" onclick="navigate('chargers')"><div class="quick-icon">⌖</div><h3>Find Chargers</h3><p>Search locations, prices and connector types.</p></div>
+    <div class="card quick" onclick="navigate('trip')"><div class="quick-icon">➤</div><h3>Trip Planner</h3><p>Estimate energy, stops and trip costs.</p></div>
+    <div class="card quick" onclick="navigate('bookings')"><div class="quick-icon">▤</div><h3>My Bookings</h3><p>View and manage reservations.</p></div>
+    <div class="card quick" onclick="navigate('session')"><div class="quick-icon">ϟ</div><h3>Charging Session</h3><p>Try the interactive session tracker.</p></div>
+    <div class="card quick" onclick="navigate('favorites')"><div class="quick-icon">♡</div><h3>Favorites</h3><p>Keep your preferred stations handy.</p></div>
+    <div class="card quick" onclick="navigate('owner')"><div class="quick-icon">⌂</div><h3>List a Charger</h3><p>Offer your home or business charger.</p></div>
+    <div class="card quick" onclick="navigate('reviews')"><div class="quick-icon">☆</div><h3>Reviews</h3><p>Leave feedback and read station reports.</p></div>
+    <div class="card quick" onclick="navigate('profile')"><div class="quick-icon">◉</div><h3>Profile & Settings</h3><p>Manage your demo account and car profile.</p></div>
+  </div>
+  <div class="section-head"><h2>Charging near you</h2><button class="btn" onclick="navigate('chargers')">View all →</button></div>
+  <div class="grid charger-grid" id="dashboardChargers"><div class="empty">Loading chargers…</div></div>
+  <footer>E CHARGE · EV charging discovery and booking demo. No actual payment or physical charger control is enabled.</footer>
+</section>
+
+<!-- FIND CHARGERS -->
+<section class="page" id="page-chargers">
+  <div class="eyebrow">EXPLORE THE NETWORK</div><h1>Find your charger.</h1>
+  <p class="sub">Search stations and filter by connector, charging speed, price and amenities. Select a station to book or navigate.</p>
+  <div class="grid filters">
+    <div class="card filter-card field"><label>Search location/name</label><input id="searchInput" placeholder="e.g. Mohali" oninput="loadChargers()"></div>
+    <div class="card filter-card field"><label>Connector</label><select id="connectorFilter" onchange="loadChargers()"><option value="">All connectors</option><option>CCS2</option><option>Type 2</option><option>CHAdeMO</option></select></div>
+    <div class="card filter-card field"><label>Charger type</label><select id="typeFilter" onchange="loadChargers()"><option value="">All types</option><option value="DC">DC fast charging</option><option value="AC">AC charging</option></select></div>
+    <div class="card filter-card field"><label>Max ₹ / kWh</label><input id="priceFilter" type="number" min="0" placeholder="No limit" onchange="loadChargers()"></div>
+    <div class="card filter-card field"><label>Minimum kW</label><select id="powerFilter" onchange="loadChargers()"><option value="">Any speed</option><option value="7">7 kW+</option><option value="22">22 kW+</option><option value="50">50 kW+</option><option value="100">100 kW+</option></select></div>
+  </div>
+  <div class="row-between" style="margin:17px 0"><span class="muted" id="chargerCount">Loading…</span><button class="btn" onclick="resetFilters()">Reset filters</button></div>
+  <div class="grid charger-grid" id="chargerGrid"><div class="empty">Loading chargers…</div></div>
+</section>
+
+<!-- TRIP PLANNER -->
+<section class="page" id="page-trip">
+  <div class="eyebrow">PLAN BEFORE YOU DRIVE</div><h1>Your next journey.</h1>
+  <p class="sub">Get a basic energy and cost estimate. This demo does not yet calculate a verified route or live charger stops.</p>
+  <div class="grid two-col">
+    <div class="card">
+      <h2>Journey details</h2>
+      <div class="form-grid">
+        <div class="field"><label>Starting point</label><input id="tripFrom" placeholder="e.g. Mohali"></div>
+        <div class="field"><label>Destination</label><input id="tripTo" placeholder="e.g. Shimla"></div>
+        <div class="field"><label>Distance (km)</label><input id="tripDistance" type="number" min="1" value="100"></div>
+        <div class="field"><label>Efficiency (kWh / 100 km)</label><input id="tripEfficiency" type="number" min="1" value="16"></div>
+        <div class="field"><label>Battery capacity (kWh)</label><input id="tripBattery" type="number" min="1" value="60"></div>
+        <div class="field"><label>Current battery (%)</label><input id="tripCharge" type="number" min="0" max="100" value="80"></div>
+        <div class="field full"><label>Charging price (₹ / kWh)</label><input id="tripPrice" type="number" min="0" value="18"></div>
+      </div>
+      <div class="actions"><button class="btn primary" onclick="calculateTrip()">Calculate journey</button><button class="btn" onclick="openRoute()">Open directions</button></div>
+    </div>
+    <div class="card">
+      <h2>Journey estimate</h2>
+      <div class="grid" style="grid-template-columns:1fr 1fr">
+        <div><div class="stat-label">Energy needed</div><div class="big-number" id="tripEnergy">16 kWh</div></div>
+        <div><div class="stat-label">Estimated cost</div><div class="big-number" id="tripCost">₹288</div></div>
+        <div><div class="stat-label">Estimated range at current charge</div><div class="stat-value" id="tripRange">300 km</div></div>
+        <div><div class="stat-label">Suggested extra energy</div><div class="stat-value" id="tripExtra">0 kWh</div></div>
+      </div>
+      <div class="notice" id="tripMessage">Estimates depend on your EV, weather, driving style and road conditions. Allow a safety margin.</div>
+      <div class="map-box"><div class="map-pin">⌖</div><h3>Continue with Google Maps</h3><p>Open route directions using the locations you entered.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKINGS -->
+<section class="page" id="page-bookings">
+  <div class="eyebrow">YOUR RESERVATIONS</div><h1>My bookings.</h1>
+  <p class="sub">Choose a station and reserve a time slot. Reservations are stored by the demo server and may disappear when it restarts.</p>
+  <div class="grid two-col">
+    <div class="card">
+      <h2>Reserve a charger</h2>
+      <form id="bookingForm" class="form-grid">
+        <div class="field full"><label>Charging station</label><select id="bookingCharger" required><option value="">Select a station</option></select></div>
+        <div class="field"><label>Date and time</label><input id="bookingDate" type="datetime-local" required></div>
+        <div class="field"><label>Duration</label><select id="bookingDuration"><option value="30">30 minutes</option><option value="60">60 minutes</option><option value="90">90 minutes</option><option value="120">120 minutes</option></select></div>
+        <div class="field"><label>Car model</label><input id="bookingCar" placeholder="e.g. Tata Nexon EV"></div>
+        <div class="field"><label>Connector</label><select id="bookingConnector"><option>CCS2</option><option>Type 2</option><option>CHAdeMO</option></select></div>
+        <div class="field full"><label>Notes (optional)</label><textarea id="bookingNotes" placeholder="Any special requirements"></textarea></div>
+        <div class="full"><div class="notice">A 10-minute grace period is part of this demo. Prices are estimates; no real payment will be taken.</div><button class="btn primary" type="submit">Confirm demo booking</button></div>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Before you book</h2>
+      <p>• Check connector compatibility with your vehicle.</p>
+      <p>• Confirm the station's listed availability and opening hours.</p>
+      <p>• Arrive close to your reserved time.</p>
+      <p>• Real-time status and no-show enforcement require production infrastructure.</p>
+      <div class="notice warning">Demo notice: booking is not a guaranteed real-world charging reservation.</div>
+    </div>
+  </div>
+  <div class="section-head"><h2>Booking history</h2><button class="btn" onclick="loadBookings()">↻ Refresh</button></div>
+  <div class="card table-wrap"><table><thead><tr><th>Station</th><th>Date & time</th><th>Duration</th><th>Estimate</th><th>Status</th></tr></thead><tbody id="bookingRows"><tr><td colspan="5">Loading bookings…</td></tr></tbody></table></div>
+</section>
+
+<!-- CHARGING SESSION -->
+<section class="page" id="page-session">
+  <div class="eyebrow">YOUR CHARGING PROGRESS</div><h1>Charging session.</h1>
+  <p class="sub">Try the session tracker interface. The battery level and charging progress are simulated, not read from a real vehicle or charger.</p>
+  <div class="grid two-col">
+    <div class="card">
+      <div class="row-between"><h2>Session monitor</h2><span class="status warn" id="sessionStatus">Not started</span></div>
+      <div class="map-box">
+        <div style="font-size:12px;color:var(--muted)">BATTERY LEVEL</div>
+        <div class="big-number" id="sessionBattery">25%</div>
+        <div style="font-size:30px;color:var(--green)">▰ ▰ ▰ ▱ ▱</div>
+        <div class="session-progress"><div id="sessionBar"></div></div>
+        <div class="muted" id="sessionMessage">Start a demo session to see the tracker.</div>
+      </div>
+      <div class="actions"><button class="btn primary" id="startSessionBtn" onclick="startSession()">Start demo session</button><button class="btn" onclick="stopSession()">Stop session</button><button class="btn" onclick="resetSession()">Reset</button></div>
+    </div>
+    <div class="card">
+      <h2>Session summary</h2>
+      <div class="grid" style="grid-template-columns:1fr 1fr">
+        <div><div class="stat-label">Energy delivered</div><div class="stat-value" id="sessionEnergy">0.0 kWh</div></div>
+        <div><div class="stat-label">Estimated cost</div><div class="stat-value" id="sessionCost">₹0</div></div>
+        <div><div class="stat-label">Time remaining</div><div class="stat-value" id="sessionTime">—</div></div>
+        <div><div class="stat-label">Charging power</div><div class="stat-value" id="sessionPower">— kW</div></div>
+      </div>
+      <div class="notice">Real sessions need a charger operator integration, vehicle data and secure device communication. This screen is a UI demonstration.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FAVORITES -->
+<section class="page" id="page-favorites">
+  <div class="eyebrow">YOUR SAVED STATIONS</div><h1>Favorites.</h1>
+  <p class="sub">Save stations you like and return to them quickly. Favorites are saved in this browser.</p>
+  <div class="grid charger-grid" id="favoritesGrid"><div class="empty">Loading favorites…</div></div>
+  <div class="actions"><button class="btn" onclick="navigate('chargers')">Find more chargers →</button></div>
+</section>
+
+<!-- OWNER -->
+<section class="page" id="page-owner">
+  <div class="eyebrow">JOIN THE NETWORK</div><h1>Your charger. Your opportunity.</h1>
+  <p class="sub">List your home charger or commercial charging station and set your own rates and operating hours.</p>
+  <div class="grid two-col">
+    <div class="card">
+      <h2>List a charger</h2>
+      <form id="ownerForm" class="form-grid">
+        <div class="field full"><label>Station / listing name</label><input id="ownerName" required placeholder="e.g. Green Home Charger"></div>
+        <div class="field full"><label>Address / area</label><input id="ownerAddress" required placeholder="City, area and address"></div>
+        <div class="field"><label>Listing type</label><select id="ownerType"><option value="Home">Home charger</option><option value="Commercial">Commercial station</option></select></div>
+        <div class="field"><label>Charger type</label><select id="ownerPowerType"><option value="AC">AC</option><option value="DC">DC fast charger</option></select></div>
+        <div class="field"><label>Connector</label><select id="ownerConnector"><option>CCS2</option><option>Type 2</option><option>CHAdeMO</option></select></div>
+        <div class="field"><label>Power (kW)</label><input id="ownerPower" type="number" min="1" value="7" required></div>
+        <div class="field"><label>Price (₹ / kWh)</label><input id="ownerPrice" type="number" min="0" value="15" required></div>
+        <div class="field"><label>Number of connectors</label><input id="ownerCount" type="number" min="1" value="1" required></div>
+        <div class="field"><label>Opening time</label><input id="ownerOpen" type="time" value="08:00"></div>
+        <div class="field"><label>Closing time</label><input id="ownerClose" type="time" value="22:00"></div>
+        <div class="field full"><label>Owner email</label><input id="ownerEmail" type="email" required placeholder="you@example.com"></div>
+        <div class="field full"><label>Amenities (optional)</label><input id="ownerAmenities" placeholder="Parking, Wi-Fi, cafe"></div>
+        <div class="field full"><button class="btn" type="button" onclick="verifyOwnerEmail()">Send demo email verification code</button></div>
+        <div class="field full" id="ownerVerifyArea" style="display:none"><label>Enter demo verification code</label><input id="ownerCode" placeholder="Enter the code shown in the message"></div>
+        <div class="full"><div class="notice warning">Email verification is simulated in your browser. It does not send a real email or verify identity.</div><button class="btn primary" type="submit">Submit charger listing</button></div>
+      </form>
+    </div>
+    <div class="card">
+      <h2>How it works</h2>
+      <p><b>01 · List</b><br>Share your location, connector and price.</p>
+      <p><b>02 · Set availability</b><br>Provide operating hours and connector count.</p>
+      <p><b>03 · Welcome drivers</b><br>Drivers can discover your listing in the demo network.</p>
+      <p><b>04 · Manage responsibly</b><br>Keep pricing, access and safety information accurate.</p>
+      <div class="notice">Before accepting real customers, arrange suitable electrical installation, permissions, insurance, secure payments and a genuine booking/availability system.</div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="page" id="page-reviews">
+  <div class="eyebrow">COMMUNITY FEEDBACK</div><h1>Reviews & feedback.</h1>
+  <p class="sub">Share your experience to help drivers understand station quality and the app experience.</p>
+  <div class="grid two-col">
+    <div class="card">
+      <h2>Leave feedback</h2>
+      <form id="feedbackForm" class="form-grid">
+        <div class="field full"><label>Feedback type</label><select id="feedbackType"><option value="app">E CHARGE app</option><option value="station">Charging station</option></select></div>
+        <div class="field full"><label>Station (if applicable)</label><select id="feedbackCharger"><option value="">General app feedback</option></select></div>
+        <div class="field"><label>Rating</label><select id="feedbackRating"><option value="5">★★★★★ — Excellent</option><option value="4">★★★★ — Good</option><option value="3">★★★ — Okay</option><option value="2">★★ — Poor</option><option value="1">★ — Very poor</option></select></div>
+        <div class="field"><label>Your name (optional)</label><input id="feedbackName" placeholder="Display name"></div>
+        <div class="field full"><label>Your comments</label><textarea id="feedbackText" required placeholder="What went well? What could be improved?"></textarea></div>
+        <div class="full"><button class="btn primary" type="submit">Submit feedback</button></div>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Help the community</h2>
+      <div class="rating">★★★★★</div>
+      <p>Useful reports mention whether the station was accessible, whether the connector worked, and whether the displayed price matched the listing.</p>
+      <div class="notice">Only share information you can verify. Do not include private personal information in a review.</div>
+    </div>
+  </div>
+  <div class="section-head"><h2>Recent feedback</h2><button class="btn" onclick="loadFeedback()">↻ Refresh</button></div>
+  <div class="grid two-col" id="feedbackGrid"><div class="empty">Loading feedback…</div></div>
+</section>
+
+<!-- PROFILE -->
+<section class="page" id="page-profile">
+  <div class="eyebrow">YOUR ACCOUNT</div><h1>Profile & settings.</h1>
+  <p class="sub">Save a demo profile and your vehicle details in this browser.</p>
+  <div class="grid two-col">
+    <div class="card">
+      <h2>Profile</h2>
+      <form id="profileForm" class="form-grid">
+        <div class="field full"><label>Full name</label><input id="profileName" placeholder="Your name"></div>
+        <div class="field full"><label>Email</label><input id="profileEmail" type="email" placeholder="you@example.com"></div>
+        <div class="field full"><label>Phone number</label><input id="profilePhone" type="tel" placeholder="+91"></div>
+        <div class="full"><button class="btn primary" type="submit">Save profile</button></div>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Your EV</h2>
+      <form id="carForm" class="form-grid">
+        <div class="field full"><label>Car make and model</label><input id="carModel" placeholder="e.g. Tata Nexon EV"></div>
+        <div class="field"><label>Battery capacity (kWh)</label><input id="carBattery" type="number" min="1" value="40"></div>
+        <div class="field"><label>Typical efficiency (kWh / 100 km)</label><input id="carEfficiency" type="number" min="1" value="16"></div>
+        <div class="field full"><label>Preferred connector</label><select id="carConnector"><option>CCS2</option><option>Type 2</option><option>CHAdeMO</option></select></div>
+        <div class="full"><button class="btn primary" type="submit">Save vehicle</button></div>
+      </form>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h2>Notifications & privacy</h2>
+    <p>Enable a local demo alert when a station is reported as available. This does not send push notifications.</p>
+    <label style="display:flex;align-items:center;gap:10px;font-size:12px"><input type="checkbox" id="alertToggle"> Enable browser demo availability alert</label>
+    <div class="actions"><button class="btn" onclick="testAlert()">Test alert</button><button class="btn danger" onclick="logout()">Sign out of demo</button></div>
+    <div class="notice">This demo stores profile, vehicle details and favorites in browser local storage. Avoid using real passwords or sensitive information.</div>
+  </div>
+</section>
+
+<footer>© E CHARGE · Prototype interface · Demo bookings, verification, payments and charger status are not production services.</footer>
+</div>
+</main>
+</div>
+
+<nav class="mobile-nav" id="mobileNav">
+  <button class="active" data-page="dashboard"><span>▦</span>Home</button>
+  <button data-page="chargers"><span>⌖</span>Find</button>
+  <button data-page="bookings"><span>▤</span>Bookings</button>
+  <button data-page="favorites"><span>♡</span>Saved</button>
+  <button data-page="profile"><span>◉</span>Profile</button>
+</nav>
+
+<div class="modal" id="loginModal">
+  <div class="modal-box">
+    <div class="row-between"><h2>Welcome to E CHARGE</h2><button class="btn" onclick="closeLogin()">✕</button></div>
+    <p>Sign in to personalize your demo experience.</p>
+    <form id="loginForm" class="grid">
+      <div class="field"><label>Email or phone</label><input id="loginIdentity" required placeholder="Email or phone number"></div>
+      <div class="field"><label>Demo password</label><input id="loginPassword" type="password" required placeholder="Any demo password"></div>
+      <button class="btn primary" type="submit">Sign in to demo</button>
+    </form>
+    <div class="notice">This is a local demo sign-in, not secure authentication. Do not enter a real password.</div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const API = '/api';
+let chargers = [];
+let bookings = [];
+let sessionTimer = null;
+let sessionRunning = false;
+let sessionSeconds = 0;
+let sessionBattery = 25;
+let sessionEnergy = 0;
+let demoOwnerCode = '';
+
+function toast(message){
+  const t=$('toast');t.textContent=message;t.style.display='block';
+  clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.style.display='none',3000);
+}
+async function api(path,options={}){
+  const opts={...options,headers:{'Content-Type':'application/json',...(options.headers||{})}};
+  const response=await fetch(API+path,opts);
+  let data={};
+  try{data=await response.json()}catch{}
+  if(!response.ok)throw new Error(data.error||data.message||'Request failed ('+response.status+')');
+  return data;
+}
+function navigate(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const target=$('page-'+page);
+  if(!target){toast('Feature not found');return}
+  target.classList.add('active');
+  document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+  const labels={dashboard:'Dashboard',chargers:'Find Chargers',trip:'Trip Planner',bookings:'My Bookings',session:'Charging Session',favorites:'Favorites',owner:'List a Charger',reviews:'Reviews & Feedback',profile:'Profile & Settings'};
+  $('pageTitle').textContent=labels[page]||page;
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(page==='chargers')loadChargers();
+  if(page==='bookings')loadBookings();
+  if(page==='favorites')renderFavorites();
+  if(page==='reviews')loadFeedback();
+}
+document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.page)));
+
+function money(n){return '₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2})}
+function safe(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function statusClass(s){
+ const v=String(s||'').toLowerCase();
+ if(v.includes('out')||v.includes('fault')||v.includes('down')||v.includes('unavailable'))return 'bad';
+ if(v.includes('busy')||v.includes('degraded')||v.includes('maintenance'))return 'warn';
+ return 'good';
+}
+function chargerId(c){return c.id??c._id??c.chargerId}
+function chargerName(c){return c.name||c.stationName||'Charging station'}
+function chargerAddress(c){return c.address||c.location||c.city||'Address not provided'}
+function chargerPower(c){return Number(c.power??c.powerKw??c.kw??50)}
+function chargerPrice(c){return Number(c.price??c.pricePerKwh??c.rate??18)}
+function chargerConnector(c){return c.connector||c.connectorType||'CCS2'}
+function chargerStatus(c){return c.status||'Available'}
+function chargerAvailable(c){
+ const status=chargerStatus(c).toLowerCase();
+ if(status.includes('out')||status.includes('fault')||status.includes('down')||status.includes('unavailable'))return false;
+ return true;
+}
+function favoriteIds(){try{return JSON.parse(localStorage.getItem('ech_favorites')||'[]')}catch{return []}}
+function saveFavorites(ids){localStorage.setItem('ech_favorites',JSON.stringify(ids));$('statFavorites').textContent=ids.length}
+function isFavorite(c){return favoriteIds().includes(String(chargerId(c)))}
+function toggleFavorite(id){
+ id=String(id);let ids=favoriteIds();
+ ids=ids.includes(id)?ids.filter(x=>x!==id):[...ids,id];
+ saveFavorites(ids);loadChargers();renderFavorites();toast(ids.includes(id)?'Added to favorites':'Removed from favorites');
+}
+function cardHTML(c){
+ const id=chargerId(c),name=chargerName(c),available=chargerAvailable(c),status=chargerStatus(c);
+ const count=c.availableConnectors??c.available??c.freeConnectors;
+ const total=c.totalConnectors??c.connectorCount??c.capacity;
+ const availability=(count!==undefined&&total!==undefined)?`${count}/${total} connectors free`:'Availability not verified';
+ return `<article class="card charger-card">
+ <div class="charger-top"><div class="charger-icon">ϟ</div><span class="status ${statusClass(status)}">${safe(status)}</span></div>
+ <div class="charger-body"><h3>${safe(name)}</h3><p>⌖ ${safe(chargerAddress(c))}</p>
+ <span class="tag">${safe(chargerConnector(c))}</span><span class="tag">${safe(chargerPower(c))} kW</span>
+ <span class="tag gray">${safe(c.type||c.chargerType||'EV charger')}</span>
+ <p style="font-size:11px">${safe(availability)}</p>
+ <div class="row-between"><div class="price">${money(chargerPrice(c))}<small> / kWh</small></div><button class="btn" onclick="toggleFavorite('${safe(id)}')">${isFavorite(c)?'♥ Saved':'♡ Save'}</button></div>
+ <div class="actions"><button class="btn primary" onclick="bookCharger('${safe(id)}')" ${available?'':'disabled'}>${available?'Book charger':'Unavailable'}</button>
+ <button class="btn" onclick="directions('${safe(chargerAddress(c))}')">Directions ↗</button></div></div></article>`;
+}
+function renderChargerCards(list,elementId){
+ const el=$(elementId);
+ if(!list.length){el.innerHTML='<div class="empty">No chargers found. Try changing your filters.</div>';return}
+ el.innerHTML=list.map(cardHTML).join('');
+}
+async function loadChargers(){
+ try{
+  const params=new URLSearchParams();
+  if($('searchInput')?.value.trim())params.set('search',$('searchInput').value.trim());
+  if($('connectorFilter')?.value)params.set('connector',$('connectorFilter').value);
+  if($('typeFilter')?.value)params.set('type',$('typeFilter').value);
+  if($('priceFilter')?.value)params.set('maxPrice',$('priceFilter').value);
+  if($('powerFilter')?.value)params.set('minPower',$('powerFilter').value);
+  const data=await api('/chargers'+(params.size?'?'+params.toString():''));
+  chargers=Array.isArray(data)?data:(data.chargers||data.items||data.data||[]);
+  $('chargerCount').textContent=chargers.length+' station(s) listed';
+  renderChargerCards(chargers,'chargerGrid');
+  renderChargerCards(chargers.slice(0,2),'dashboardChargers');
+  populateChargerSelects();
+  const totalFree=chargers.reduce((sum,c)=>sum+Number(c.availableConnectors??c.available??c.freeConnectors??0),0);
+  $('statStations').textContent=chargers.length;
+  $('statFree').textContent=totalFree||'—';
+ }catch(e){
+  $('chargerGrid').innerHTML='<div class="empty">Could not load chargers. Make sure the E CHARGE server is running. '+safe(e.message)+'</div>';
+  $('dashboardChargers').innerHTML='<div class="empty">Server not connected yet. Start your backend and refresh.</div>';
+  $('chargerCount').textContent='Connection problem';
+ }
+}
+function populateChargerSelects(){
+ const options='<option value="">Select a station</option>'+chargers.map(c=>`<option value="${safe(chargerId(c))}">${safe(chargerName(c))} — ${safe(chargerAddress(c))}</option>`).join('');
+ $('bookingCharger').innerHTML=options;
+ $('feedbackCharger').innerHTML='<option value="">General app feedback</option>'+chargers.map(c=>`<option value="${safe(chargerId(c))}">${safe(chargerName(c))}</option>`).join('');
+}
+function resetFilters(){
+ ['searchInput','connectorFilter','typeFilter','priceFilter','powerFilter'].forEach(id=>$(id).value='');
+ loadChargers();
+}
+function bookCharger(id){
+ navigate('bookings');$('bookingCharger').value=String(id);
+ $('bookingConnector').value=chargerConnector(chargers.find(c=>String(chargerId(c))===String(id))||{});
+}
+function directions(address){
+ const url='https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(address);
+ window.open(url,'_blank','noopener,noreferrer');
+}
+function openRoute(){
+ const from=$('tripFrom').value.trim(),to=$('tripTo').value.trim();
+ if(!to){toast('Enter a destination first');return}
+ const url='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(from)+'&destination='+encodeURIComponent(to)+'&travelmode=driving';
+ window.open(url,'_blank','noopener,noreferrer');
+}
+function calculateTrip(){
+ const d=Number($('tripDistance').value),eff=Number($('tripEfficiency').value),cap=Number($('tripBattery').value),charge=Number($('tripCharge').value),price=Number($('tripPrice').value);
+ if(!(d>0&&eff>0&&cap>0&&charge>=0&&charge<=100&&price>=0)){toast('Enter valid journey details');return}
+ const energy=d*eff/100,available=cap*charge/100,range=cap*100/eff*charge/100,extra=Math.max(0,energy-available);
+ $('tripEnergy').textContent=energy.toFixed(1)+' kWh';
+ $('tripCost').textContent=money(energy*price);
+ $('tripRange').textContent=Math.round(range)+' km';
+ $('tripExtra').textContent=extra.toFixed(1)+' kWh';
+ $('tripMessage').textContent=energy<=available?'Your current estimated battery energy covers this distance, but keep a safety margin.':'You may need approximately '+extra.toFixed(1)+' additional kWh, before adding a safety margin.';
+}
+function setMinBookingDate(){
+ const now=new Date(Date.now()+15*60000);
+ now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
+ $('bookingDate').min=now.toISOString().slice(0,16);
+}
+$('bookingForm').addEventListener('submit', async e => {
+  e.preventDefault();
+
+  const id = $('bookingCharger').value;
+  if (!id) {
+    toast('Choose a charger first');
+    return;
+  }
+
+  const dateValue = $('bookingDate').value;
+  if (!dateValue) {
+    toast('Choose a date and time');
+    return;
+  }
+
+  const selected = chargers.find(
+    c => String(chargerId(c)) === String(id)
+  );
+
+  const payload = {
+  chargerId: id,
+  stationId: id,
+  chargerName: chargerName(selected || {}),
+
+  customer: $('bookingName')?.value || 'E CHARGE Customer',
+  phone: $('bookingPhone')?.value || '0000000000',
+  car: $('bookingCar').value,
+
+  date: dateValue,
+  time: dateValue.includes('T')
+    ? dateValue.split('T')[1].slice(0, 5)
+    : dateValue,
+
+  duration: Number($('bookingDuration').value),
+  minutes: Number($('bookingDuration').value),
+  connector: $('bookingConnector').value,
+  notes: $('bookingNotes').value,
+  kwh: 20
+};
+
+  const button = $('bookingForm').querySelector(
+    'button[type="submit"]'
+  );
+
+  button.disabled = true;
+  button.textContent = 'Confirming booking...';
+
+  try {
+    await api('/bookings', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+
+    showBookingSuccess();
+    $('bookingForm').reset();
+    setMinBookingDate();
+
+    await loadBookings();
+    await loadChargers();
+  } catch (err) {
+    toast('Booking failed: ' + err.message);
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Confirm demo booking';
+  }
+});
+async function loadBookings(){
+ try{
+  const data=await api('/bookings');
+  bookings=Array.isArray(data)?data:(data.bookings||data.items||data.data||[]);
+  renderBookings();
+ }catch(e){$('bookingRows').innerHTML='<tr><td colspan="5">Could not load bookings. '+safe(e.message)+'</td></tr>'}
+}
+function bookingDate(b){return b.date||b.datetime||b.startTime||b.bookingTime||'—'}
+function renderBookings(){
+ $('statBookings').textContent=bookings.length;
+ if(!bookings.length){$('bookingRows').innerHTML='<tr><td colspan="5">No bookings yet. Reserve a charger to see it here.</td></tr>';return}
+ $('bookingRows').innerHTML=bookings.slice().reverse().map(b=>{
+  const c=chargers.find(x=>String(chargerId(x))===String(b.chargerId||b.stationId));
+  const name=b.chargerName||b.stationName||chargerName(c||{});
+  const dt=bookingDate(b);
+  let formatted=dt;
+  try{formatted=new Date(dt).toLocaleString()}catch{}
+  return `<tr><td>${safe(name)}</td><td>${safe(formatted)}</td><td>${safe(b.duration||b.durationMinutes||30)} min</td><td>${money(b.estimatedCost??b.price??b.totalCost??0)}</td><td><span class="status ${statusClass(b.status||'Booked')}">${safe(b.status||'Booked')}</span></td></tr>`;
+ }).join('');
+}
+function loadDashboardBookings(){loadBookings()}
+function renderFavorites(){
+ const ids=favoriteIds();
+ const list=chargers.filter(c=>ids.includes(String(chargerId(c))));
+ $('statFavorites').textContent=ids.length;
+ renderChargerCards(list,'favoritesGrid');
+}
+
+async function loadFeedback(){
+ try{
+  const data=await api('/feedback');
+  const items=Array.isArray(data)?data:(data.feedback||data.items||data.data||[]);
+  if(!items.length){$('feedbackGrid').innerHTML='<div class="empty">No feedback yet. Be the first to share your experience.</div>';return}
+  $('feedbackGrid').innerHTML=items.slice().reverse().map(f=>{
+   const stars='★'.repeat(Math.max(0,Math.min(5,Number(f.rating||5))))+'☆'.repeat(5-Math.max(0,Math.min(5,Number(f.rating||5))));
+   return `<div class="card"><div class="row-between"><h3>${safe(f.name||f.userName||'Community member')}</h3><span class="rating" style="font-size:15px;letter-spacing:1px">${stars}</span></div><p>${safe(f.type||'Feedback')} ${f.chargerName?'· '+safe(f.chargerName):''}</p><p>${safe(f.comment||f.message||f.feedback||'')}</p></div>`;
+  }).join('');
+ }catch(e){$('feedbackGrid').innerHTML='<div class="empty">Feedback could not be loaded. '+safe(e.message)+'</div>'}
+}
+$('feedbackForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const selected=chargers.find(c=>String(chargerId(c))===$('feedbackCharger').value);
+ const payload={
+  type:$('feedbackType').value,chargerId:$('feedbackCharger').value||null,
+  chargerName:selected?chargerName(selected):'',rating:Number($('feedbackRating').value),
+  name:$('feedbackName').value,comment:$('feedbackText').value,message:$('feedbackText').value
+ };
+ try{
+  await api('/feedback',{method:'POST',body:JSON.stringify(payload)});
+  toast('Thanks for your feedback!');$('feedbackForm').reset();loadFeedback();
+ }catch(err){toast(err.message)}
+});
+
+$('ownerForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ if(!demoOwnerCode||$('ownerCode').value.trim()!==demoOwnerCode){
+  toast('Verify the demo email code first');return;
+ }
+ const payload={
+  name:$('ownerName').value,address:$('ownerAddress').value,
+  type:$('ownerType').value,chargerType:$('ownerPowerType').value,
+  connector:$('ownerConnector').value,power:Number($('ownerPower').value),
+  price:Number($('ownerPrice').value),totalConnectors:Number($('ownerCount').value),
+  availableConnectors:Number($('ownerCount').value),
+  openingTime:$('ownerOpen').value,closingTime:$('ownerClose').value,
+  ownerEmail:$('ownerEmail').value,amenities:$('ownerAmenities').value,
+  status:'Available'
+ };
+ try{
+  const result=await api('/chargers',{method:'POST',body:JSON.stringify(payload)});
+  toast(result.message||'Listing submitted to the demo network');
+  $('ownerForm').reset();demoOwnerCode='';$('ownerVerifyArea').style.display='none';
+  loadChargers();
+ }catch(err){toast('Listing could not be submitted: '+err.message)}
+});
+function verifyOwnerEmail(){
+ const email=$('ownerEmail').value.trim();
+ if(!email||!email.includes('@')){toast('Enter a valid email first');return}
+ demoOwnerCode=String(Math.floor(100000+Math.random()*900000));
+ $('ownerVerifyArea').style.display='flex';
+ $('ownerCode').value='';
+ toast('DEMO ONLY — verification code: '+demoOwnerCode);
+}
+
+function startSession(){
+ if(sessionRunning)return;
+ sessionRunning=true;$('sessionStatus').textContent='Charging (demo)';$('sessionStatus').className='status good';
+ $('startSessionBtn').disabled=true;
+ $('sessionMessage').textContent='Simulated charging is in progress.';
+ sessionTimer=setInterval(()=>{
+  sessionSeconds++;
+  sessionBattery=Math.min(100,sessionBattery+0.2);
+  sessionEnergy+=0.05;
+  $('sessionBattery').textContent=Math.round(sessionBattery)+'%';
+  $('sessionBar').style.width=sessionBattery+'%';
+  $('sessionEnergy').textContent=sessionEnergy.toFixed(2)+' kWh';
+  $('sessionCost').textContent=money(sessionEnergy*18);
+  $('sessionPower').textContent='6.0 kW';
+  $('sessionTime').textContent=Math.max(0,Math.ceil((100-sessionBattery)/0.2))+' min';
+  if(sessionBattery>=100)stopSession();
+ },1000);
+}
+function stopSession(){
+ if(sessionTimer)clearInterval(sessionTimer);
+ sessionTimer=null;sessionRunning=false;$('startSessionBtn').disabled=false;
+ $('sessionStatus').textContent='Stopped';$('sessionStatus').className='status warn';
+ $('sessionMessage').textContent='Demo session stopped. No real charger was controlled.';
+}
+function resetSession(){
+ stopSession();sessionSeconds=0;sessionBattery=25;sessionEnergy=0;
+ $('sessionBattery').textContent='25%';$('sessionBar').style.width='0%';
+ $('sessionEnergy').textContent='0.0 kWh';$('sessionCost').textContent='₹0';
+ $('sessionTime').textContent='—';$('sessionPower').textContent='— kW';
+ $('sessionStatus').textContent='Not started';$('sessionMessage').textContent='Start a demo session to see the tracker.';
+}
+
+function openLogin(){$('loginModal').classList.add('open')}
+function closeLogin(){$('loginModal').classList.remove('open')}
+$('loginModal').addEventListener('click',e=>{if(e.target===$('loginModal'))closeLogin()});
+$('loginForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ const identity=$('loginIdentity').value.trim();
+ if(!identity)return;
+ localStorage.setItem('ech_demo_user',JSON.stringify({identity,loggedIn:true}));
+ $('accountLabel').textContent=identity.includes('@')?identity.split('@')[0]:identity;
+ closeLogin();toast('Signed in to demo mode');
+});
+function logout(){
+ localStorage.removeItem('ech_demo_user');$('accountLabel').textContent='Sign in';toast('Signed out of demo');
+}
+function testAlert(){
+ if(!('Notification'in window)){toast('Browser notifications are not supported here');return}
+ if(Notification.permission==='granted'){new Notification('E CHARGE demo',{body:'This is a test notification. No real charger status is connected.'});return}
+ Notification.requestPermission().then(p=>{if(p==='granted')new Notification('E CHARGE demo',{body:'Notifications enabled for this browser demo.'});else toast('Browser notification permission not granted')});
+}
+$('alertToggle').addEventListener('change',e=>{
+ localStorage.setItem('ech_alerts',e.target.checked?'1':'0');
+ if(e.target.checked)toast('Demo alert preference saved');
+});
+$('profileForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ localStorage.setItem('ech_profile',JSON.stringify({name:$('profileName').value,email:$('profileEmail').value,phone:$('profilePhone').value}));
+ toast('Profile saved in this browser');
+});
+$('carForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ localStorage.setItem('ech_car',JSON.stringify({model:$('carModel').value,battery:$('carBattery').value,efficiency:$('carEfficiency').value,connector:$('carConnector').value}));
+ toast('Vehicle details saved');
+});
+function restoreLocal(){
+ try{
+  const user=JSON.parse(localStorage.getItem('ech_demo_user')||'null');
+  if(user?.loggedIn)$('accountLabel').textContent=user.identity.includes('@')?user.identity.split('@')[0]:user.identity;
+  const p=JSON.parse(localStorage.getItem('ech_profile')||'null');
+  if(p){$('profileName').value=p.name||'';$('profileEmail').value=p.email||'';$('profilePhone').value=p.phone||''}
+  const c=JSON.parse(localStorage.getItem('ech_car')||'null');
+  if(c){$('carModel').value=c.model||'';$('carBattery').value=c.battery||40;$('carEfficiency').value=c.efficiency||16;$('carConnector').value=c.connector||'CCS2';$('bookingCar').value=c.model||''}
+  $('alertToggle').checked=localStorage.getItem('ech_alerts')==='1';
+  $('statFavorites').textContent=favoriteIds().length;
+ }catch{}
+}
+async function checkServer(){
+ try{
+  await api('/status');$('serverStatus').textContent='Server connected';
+ }catch{
+  $('serverStatus').textContent='Server offline';
+ }
+}
+async function init(){
+ restoreLocal();setMinBookingDate();calculateTrip();checkServer();
+ await loadChargers();
+ await loadBookings();
+ await loadFeedback();
+}
+init();
+</script>
+<!-- E CHARGE BOOKING SUCCESS POPUP -->
+<style>
+#successPopup {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(2, 8, 23, 0.88);
+  backdrop-filter: blur(8px);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+#successPopup.show {
+  display: flex;
+  animation: popupFade 0.35s ease;
+}
+
+.success-card {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: 360px;
+  padding: 35px 25px;
+  text-align: center;
+  color: white;
+  background: linear-gradient(145deg, #102a3a, #061321);
+  border: 1px solid #00ffc8;
+  border-radius: 24px;
+  box-shadow: 0 0 35px rgba(0, 255, 200, 0.3);
+}
+
+.success-check {
+  width: 85px;
+  height: 85px;
+  margin: 0 auto 20px;
+  border: 3px solid #00ffc8;
+  border-radius: 50%;
+  color: #00ffc8;
+  font-size: 52px;
+  line-height: 79px;
+  font-weight: bold;
+  box-shadow: 0 0 25px rgba(0, 255, 200, 0.6);
+  animation: checkPop 0.5s ease;
+}
+
+.success-card h2 {
+  color: #00ffc8;
+  margin: 10px 0;
+}
+
+.success-card p {
+  color: #d1e5ed;
+  line-height: 1.6;
+}
+
+.success-card button {
+  margin-top: 15px;
+  padding: 12px 28px;
+  border: 0;
+  border-radius: 10px;
+  background: #00ffc8;
+  color: #03201c;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.confetti {
+  position: absolute;
+  top: -20px;
+  width: 8px;
+  height: 12px;
+  background: #00ffc8;
+  animation: glitterFall 2.5s linear forwards;
+  pointer-events: none;
+}
+
+@keyframes glitterFall {
+  to {
+    transform: translateY(450px) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes checkPop {
+  0% { transform: scale(0.2); opacity: 0; }
+  70% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes popupFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+</style>
+
+<div id="successPopup" role="dialog" aria-modal="true"
+     aria-labelledby="successTitle">
+  <div class="success-card" id="successCard">
+    <div class="success-check">✓</div>
+    <h2 id="successTitle">Booking Successful!</h2>
+    <p>Your EV charging booking has been confirmed.</p>
+    <button type="button" onclick="closeBookingSuccess()">
+      Awesome!
+    </button>
+  </div>
+</div>
+<script>
+function showBookingSuccess() {
+  const popup = document.getElementById("successPopup");
+  const card = document.getElementById("successCard");
+
+  if (!popup || !card) return;
+
+  card.querySelectorAll(".confetti").forEach(el => el.remove());
+
+  for (let i = 0; i < 45; i++) {
+    const glitter = document.createElement("span");
+    glitter.className = "confetti";
+    glitter.style.left = Math.random() * 100 + "%";
+    glitter.style.background =
+      ["#00ffc8", "#ffffff", "#00aaff", "#ffe066"][
+        Math.floor(Math.random() * 4)
+      ];
+    glitter.style.animationDelay = Math.random() * 0.8 + "s";
+    card.appendChild(glitter);
+  }
+
+  popup.classList.add("show");
+}
+
+function closeBookingSuccess() {
+  document.getElementById("successPopup").classList.remove("show");
+}
+</script>
+</body>
+</html>
