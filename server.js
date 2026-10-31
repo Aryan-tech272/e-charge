@@ -5,10 +5,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json({ limit: "1mb" }));
-app.use(express.static(__dirname));
+app.use(express.static(__dirname));  
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
+
 let chargers = [
   {
     id: 1, name: "GreenCharge Ultra Hub", ownerName: "GreenCharge",
@@ -178,46 +179,70 @@ app.post("/api/bookings", (req, res) => {
     return res.status(409).json({ error: "This charger is currently unavailable." });
   }
 
-  const start = new Date(`${date}T${time}:00`);
-  if (Number.isNaN(start.getTime()) || start <= new Date()) {
-    return res.status(400).json({ error: "Choose a future date and time." });
-  }
+  // Interpret booking time in Indian Standard Time
+const start = new Date(`${date}T${time}:00+05:30`);
+
+// Require at least 10 minutes from the current time
+const minimumTime = Date.now() + 10 * 60 * 1000;
+
+if (Number.isNaN(start.getTime()) || start.getTime() < minimumTime) {
+  return res.status(400).json({
+    error: "Choose a date and time at least 10 minutes from now."
+  });
+}
 
   const end = new Date(start.getTime() + minutes * 60000);
-  const conflict = bookings.some(b =>
-    b.chargerId === charger.id &&
-    b.date === date &&
-    b.status === "Confirmed" &&
-    start < new Date(`${b.date}T${b.time}:00`).getTime() + b.minutes * 60000 &&
-    end.getTime() > new Date(`${b.date}T${b.time}:00`).getTime()
-  );
-
-  if (conflict) {
-    return res.status(409).json({
-      error: "That time overlaps another booking. Please choose another slot."
-    });
+const conflict = bookings.some(b => {
+  if (
+    b.chargerId !== charger.id ||
+    b.date !== date ||
+    b.status !== "Confirmed"
+  ) {
+    return false;
   }
 
-  const booking = {
-    id: nextBookingId++,
-    chargerId: charger.id,
-    chargerName: charger.name,
-    customer, phone, car, date, time, minutes, kwh,
-    estimatedCost: Math.round(kwh * charger.price * 100) / 100,
-    gracePeriodMinutes: 10,
-    noShowPolicy: "Arrive within 10 minutes or the reservation may be cancelled.",
-    paymentStatus: "Demo only - not charged",
-    status: "Confirmed",
-    createdAt: new Date().toISOString()
-  };
+  const existingStart = new Date(`${b.date}T${b.time}:00+05:30`);
+  const existingEnd = new Date(
+    existingStart.getTime() + b.minutes * 60000
+  );
 
-  bookings.push(booking);
-  res.status(201).json({
-    message: "Demo booking confirmed.",
-    booking
-  });
+  return (
+    start.getTime() < existingEnd.getTime() &&
+    end.getTime() > existingStart.getTime()
+  );
 });
 
+if (conflict) {
+  return res.status(409).json({
+    error: "This time slot is already booked. Choose another time."
+  });
+}
+
+const booking = {
+  id: nextBookingId++,
+  chargerId: charger.id,
+  chargerName: charger.name,
+  customer,
+  phone,
+  car,
+  date,
+  time,
+  minutes,
+  kwh,
+  estimatedCost: Math.round(kwh * charger.price * 100) / 100,
+  status: "Confirmed",
+  paymentStatus: "Demo only - not charged",
+  gracePeriodMinutes: 10,
+  createdAt: new Date().toISOString()
+};
+
+bookings.push(booking);
+
+res.status(201).json({
+  message: "Booking confirmed successfully!",
+  booking
+});
+});
 app.get("/api/bookings", (req, res) => {
   const phone = clean(req.query.phone, 20);
   res.json(phone
