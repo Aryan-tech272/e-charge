@@ -356,12 +356,218 @@ input[type="checkbox"]{accent-color:var(--green)}
   display: block;
   margin: auto;
 }
+/* E CHARGE Light Theme */
+body[data-theme="light"] {
+  background: #f3f7fa;
+  color: #172635;
+}
+
+body[data-theme="light"] .sidebar,
+body[data-theme="light"] .mobile-nav {
+  background: #ffffff;
+  border-color: #d6e0e8;
+}
+
+body[data-theme="light"] .topbar {
+  background: #ffffff;
+  border-color: #d6e0e8;
+}
+
+body[data-theme="light"] .card {
+  background: #ffffff;
+  border-color: #d6e0e8;
+  color: #172635;
+}
+
+body[data-theme="light"] p,
+body[data-theme="light"] .crumb {
+  color: #43576a;
+}
+
+body[data-theme="light"] input,
+body[data-theme="light"] select,
+body[data-theme="light"] textarea {
+  background: #ffffff;
+  color: #172635;
+  border-color: #b8c7d3;
+}
+
+body[data-theme="light"] .nav button {
+  color: #43576a;
+}
+
+body[data-theme="light"] .nav button.active {
+  background: #e5f5eb;
+  color: #087b43;
+}
+
+body[data-theme="light"] .hero {
+  background: #eaf3f5;
+  color: #172635;
+}
+
+body[data-theme="light"] .modal-box {
+  background: #ffffff;
+  color: #172635;
+}
+
+#themeToggle {
+  min-width: 112px;
+}
+/* Additional light mode styling */
+body[data-theme="light"] .side-bottom,
+body[data-theme="light"] .pill,
+body[data-theme="light"] .btn,
+body[data-theme="light"] .empty,
+body[data-theme="light"] .map-box,
+body[data-theme="light"] .modal-box {
+  background: #ffffff;
+  color: #172635;
+  border-color: #d6e0e8;
+}
+
+body[data-theme="light"] .btn.primary {
+  background: #16834c;
+  color: #ffffff;
+  border-color: #16834c;
+}
+
+body[data-theme="light"] .nav button:hover,
+body[data-theme="light"] .nav button.active {
+  background: #e5f5eb;
+  color: #087b43;
+  border-color: #c4e8d1;
+}
+
+body[data-theme="light"] .field label,
+body[data-theme="light"] .stat-label,
+body[data-theme="light"] .muted,
+body[data-theme="light"] th {
+  color: #43576a;
+}
+
+body[data-theme="light"] .tag {
+  background: #e5f5eb;
+  color: #087b43;
+  border-color: #c4e8d1;
+}
+
+body[data-theme="light"] .tag.gray {
+  background: #edf2f6;
+  color: #43576a;
+  border-color: #d6e0e8;
+}
+
+body[data-theme="light"] .notice {
+  background: #e8f6ed;
+  color: #17643b;
+  border-color: #b9dfc7;
+}
+
+body[data-theme="light"] .notice.warning {
+  background: #fff6df;
+  color: #795817;
+  border-color: #ead69e;
+}
+
+body[data-theme="light"] tbody tr:hover {
+  background: #edf5f8;
+}
+
+body[data-theme="light"] .hero {
+  border-color: #c8ded8;
+}
+
+body[data-theme="light"] .success-card {
+  background: #ffffff;
+  color: #172635;
+}
+
+body[data-theme="light"] .success-card p {
+  color: #43576a;
+}
+/* More complete light theme */
+body[data-theme="light"] .charger-icon {
+  background: #e5f5eb;
+  color: #087b43;
+  border-color: #c4e8d1;
+}
+
+body[data-theme="light"] .status.good {
+  background: #e5f5eb;
+  color: #087b43;
+  border-color: #b9dfc7;
+}
+
+body[data-theme="light"] .status.bad {
+  background: #fdebed;
+  color: #b42332;
+  border-color: #f3c3c8;
+}
+
+body[data-theme="light"] .status.warn {
+  background: #fff6df;
+  color: #795817;
+  border-color: #ead69e;
+}
+
+body[data-theme="light"] .map-box {
+  background: #edf5f8;
+  border-color: #d6e0e8;
+}
+
+body[data-theme="light"] .session-progress {
+  background: #dce7ed;
+}
+
+body[data-theme="light"] .btn.secondary {
+  background: #edf2f6;
+  color: #172635;
+  border-color: #c4d1dc;
+}
+
+body[data-theme="light"] footer {
+  color: #526779;
+}
+body[data-theme="light"] .hero h1 {
+  color: #172635;
+}
+
+body[data-theme="light"] .hero h1 span {
+  color: #087b43;
+  text-shadow: none;
+}
+
+body[data-theme="light"] .hero p {
+  color: #43576a;
+}
+
+body[data-theme="light"] .big-bolt {
+  background: #e5f5eb;
+  border-color: #b9dfc7;
+  color: #087b43;
+  box-shadow: none;
+}
+
+body[data-theme="light"] .success-card {
+  background: #ffffff;
+  color: #172635;
+  border-color: #16834c;
+}
+
+body[data-theme="light"] .success-card h2 {
+  color: #087b43;
+}
+
+body[data-theme="light"] .success-card p {
+  color: #43576a;
+}
 </style>
 </head>
 <body>
 <div class="app">
 <aside class="sidebar">
-  <div class="brand">
+<div class="brand">
     <div class="logo">
   <img src="ech-logo.png" alt="E CHARGE logo">
 </div>
@@ -387,6 +593,9 @@ input[type="checkbox"]{accent-color:var(--green)}
   <div class="crumb">E CHARGE / <b id="pageTitle">Dashboard</b></div>
   <div class="top-actions">
     <span class="pill"><span class="online-dot"></span><span id="serverStatus">Connecting…</span></span>
+    <button class="btn" id="themeToggle" type="button">
+  ☀️ Light mode
+</button>
     <button class="btn" onclick="openLogin()">◉ <span id="accountLabel">Sign in</span></button>
   </div>
 </header>
@@ -1198,6 +1407,46 @@ function showBookingSuccess() {
 
 function closeBookingSuccess() {
   document.getElementById("successPopup").classList.remove("show");
+}
+// =====================================
+// LIGHT MODE / DARK MODE TOGGLE
+// =====================================
+
+const themeToggle = document.getElementById("themeToggle");
+
+// Apply the selected theme
+function applyTheme(theme) {
+  document.body.dataset.theme = theme;
+
+  if (themeToggle) {
+    themeToggle.innerHTML =
+      theme === "light" ? "🌙 Dark mode" : "☀️ Light mode";
+  }
+
+  try {
+    localStorage.setItem("ech_theme", theme);
+  } catch (error) {
+    console.log("Could not save theme preference.");
+  }
+}
+
+// Load saved theme
+let savedTheme = "dark";
+
+try {
+  savedTheme = localStorage.getItem("ech_theme") || "dark";
+} catch (error) {
+  console.log("Using default dark theme.");
+}
+
+applyTheme(savedTheme);
+
+// Toggle theme on button click
+if (themeToggle) {
+  themeToggle.addEventListener("click", function () {
+    const currentTheme = document.body.dataset.theme;
+    applyTheme(currentTheme === "dark" ? "light" : "dark");
+  });
 }
 </script>
 </body>
