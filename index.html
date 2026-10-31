@@ -869,19 +869,41 @@ body[data-theme="light"] .success-card p {
 
 <div class="modal" id="loginModal">
   <div class="modal-box">
-    <div class="row-between"><h2>Welcome to E CHARGE</h2><button class="btn" onclick="closeLogin()">✕</button></div>
-    <p>Sign in to personalize your demo experience.</p>
-    <form id="loginForm" class="grid">
-      <div class="field"><label>Email or phone</label><input id="loginIdentity" required placeholder="Email or phone number"></div>
-      <div class="field"><label>Demo password</label><input id="loginPassword" type="password" required placeholder="Any demo password"></div>
-      <button class="btn primary" type="submit">Sign in to demo</button>
-    </form>
-    <div class="notice">This is a local demo sign-in, not secure authentication. Do not enter a real password.</div>
+    <div class="row-between">
+      <h2>Welcome to E CHARGE</h2>
+      <button class="btn" onclick="closeLogin()">✕</button>
+    </div>
+
+    <p>Sign in securely with your Google account.</p>
+
+    <button
+      class="btn primary"
+      id="googleLoginBtn"
+      type="button"
+      onclick="signInWithGoogle()"
+      style="width:100%;margin-top:15px;padding:14px;"
+    >
+      <span style="font-size:17px">G</span>
+      Continue with Google
+    </button>
+
+    <div class="notice">
+      Your Google account is used to authenticate your E CHARGE profile.
+    </div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL = "https://jkjyptgyywdtxhbcimwy.supabase.co";
+const SUPABASE_KEY = "sb_publishable_zk80Ho2lV-80kkGiq9zObg_VB4TCOwx";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
 const $ = id => document.getElementById(id);
 const API = '/api';
 let chargers = [];
@@ -1211,34 +1233,101 @@ function resetSession(){
  $('sessionTime').textContent='—';$('sessionPower').textContent='— kW';
  $('sessionStatus').textContent='Not started';$('sessionMessage').textContent='Start a demo session to see the tracker.';
 }
+function openLogin() {
+  $('loginModal').classList.add('open');
+}
 
-function openLogin(){$('loginModal').classList.add('open')}
-function closeLogin(){$('loginModal').classList.remove('open')}
-$('loginModal').addEventListener('click',e=>{if(e.target===$('loginModal'))closeLogin()});
-$('loginForm').addEventListener('submit',e=>{
- e.preventDefault();
- const identity=$('loginIdentity').value.trim();
- if(!identity)return;
- localStorage.setItem('ech_demo_user',JSON.stringify({identity,loggedIn:true}));
- $('accountLabel').textContent=identity.includes('@')?identity.split('@')[0]:identity;
- closeLogin();toast('Signed in to demo mode');
-});
-function logout(){
- localStorage.removeItem('ech_demo_user');$('accountLabel').textContent='Sign in';toast('Signed out of demo');
+function closeLogin() {
+  $('loginModal').classList.remove('open');
 }
-function testAlert(){
- if(!('Notification'in window)){toast('Browser notifications are not supported here');return}
- if(Notification.permission==='granted'){new Notification('E CHARGE demo',{body:'This is a test notification. No real charger status is connected.'});return}
- Notification.requestPermission().then(p=>{if(p==='granted')new Notification('E CHARGE demo',{body:'Notifications enabled for this browser demo.'});else toast('Browser notification permission not granted')});
+
+async function signInWithGoogle() {
+  const button = $('googleLoginBtn');
+
+  try {
+    button.disabled = true;
+    button.textContent = 'Connecting to Google...';
+
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
+
+    if (error) throw error;
+
+  } catch (error) {
+    toast('Google login failed: ' + error.message);
+    button.disabled = false;
+    button.textContent = 'G — Continue with Google';
+  }
 }
-$('alertToggle').addEventListener('change',e=>{
- localStorage.setItem('ech_alerts',e.target.checked?'1':'0');
- if(e.target.checked)toast('Demo alert preference saved');
+
+function updateAuthenticatedUser(user) {
+  if (user) {
+    const name =
+      user.user_metadata?.full_name ||
+      user.user_metadata?.name ||
+      user.email ||
+      'My Account';
+
+    $('accountLabel').textContent = name.split(' ')[0];
+
+    $('profileName').value =
+      user.user_metadata?.full_name ||
+      user.user_metadata?.name ||
+      $('profileName').value;
+
+    $('profileEmail').value = user.email || '';
+
+    closeLogin();
+  } else {
+    $('accountLabel').textContent = 'Sign in';
+  }
+}
+
+async function restoreGoogleSession() {
+  const { data, error } = await supabaseClient.auth.getSession();
+
+  if (error) {
+    console.error('Session error:', error.message);
+    return;
+  }
+
+  updateAuthenticatedUser(data.session?.user || null);
+}
+
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  updateAuthenticatedUser(session?.user || null);
+
+  if (event === 'SIGNED_IN') {
+    toast('Welcome to E CHARGE!');
+  }
+
+  if (event === 'SIGNED_OUT') {
+    toast('You have signed out.');
+  }
 });
-$('profileForm').addEventListener('submit',e=>{
- e.preventDefault();
- localStorage.setItem('ech_profile',JSON.stringify({name:$('profileName').value,email:$('profileEmail').value,phone:$('profilePhone').value}));
- toast('Profile saved in this browser');
+
+async function logout() {
+  try {
+    const { error } = await supabaseClient.auth.signOut();
+
+    if (error) throw error;
+
+    localStorage.removeItem('ech_demo_user');
+    $('accountLabel').textContent = 'Sign in';
+
+  } catch (error) {
+    toast('Sign out failed: ' + error.message);
+  }
+}
+
+$('loginModal').addEventListener('click', event => {
+  if (event.target === $('loginModal')) {
+    closeLogin();
+  }
 });
 $('carForm').addEventListener('submit',e=>{
  e.preventDefault();
@@ -1247,8 +1336,6 @@ $('carForm').addEventListener('submit',e=>{
 });
 function restoreLocal(){
  try{
-  const user=JSON.parse(localStorage.getItem('ech_demo_user')||'null');
-  if(user?.loggedIn)$('accountLabel').textContent=user.identity.includes('@')?user.identity.split('@')[0]:user.identity;
   const p=JSON.parse(localStorage.getItem('ech_profile')||'null');
   if(p){$('profileName').value=p.name||'';$('profileEmail').value=p.email||'';$('profilePhone').value=p.phone||''}
   const c=JSON.parse(localStorage.getItem('ech_car')||'null');
@@ -1264,12 +1351,20 @@ async function checkServer(){
   $('serverStatus').textContent='Server offline';
  }
 }
-async function init(){
- restoreLocal();setMinBookingDate();calculateTrip();checkServer();
- await loadChargers();
- await loadBookings();
- await loadFeedback();
+async function init() {
+  restoreLocal();
+
+  await restoreGoogleSession();
+
+  setMinBookingDate();
+  calculateTrip();
+  checkServer();
+
+  await loadChargers();
+  await loadBookings();
+  await loadFeedback();
 }
+
 init();
 </script>
 <!-- E CHARGE BOOKING SUCCESS POPUP -->
