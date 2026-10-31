@@ -9,7 +9,6 @@ app.use(express.static(__dirname));
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
-
 let chargers = [
   {
     id: 1, name: "GreenCharge Ultra Hub", ownerName: "GreenCharge",
