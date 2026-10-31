@@ -154,106 +154,123 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function openBooking(chargerId) {
-    const charger = allChargers.find(
-      item => String(item.id) === String(chargerId)
-    );
+function openBooking(chargerId) {
+  const charger = allChargers.find(
+    item => String(item.id) === String(chargerId)
+  );
 
-    if (!charger) {
-      showMessage("Please refresh the charger list and try again.", true);
-      return;
-    }
-
-    document.querySelector("#bookingPanel")?.remove();
-
-    const form = document.createElement("form");
-    form.id = "bookingPanel";
-    form.className = "owner-form";
-    form.style.marginTop = "20px";
-
-    form.innerHTML = `
-      <h3>Book ${escapeHTML(charger.name)}</h3>
-
-      <label>
-        Your name
-        <input name="customerName" required maxlength="80"
-          placeholder="Enter your name">
-      </label>
-
-      <label>
-        Date
-        <input name="date" type="date" required>
-      </label>
-
-      <label>
-        Start time
-        <input name="time" type="time" required>
-      </label>
-
-      <label>
-        Charging duration
-        <select name="duration" required>
-          <option value="30">30 minutes</option>
-          <option value="60">1 hour</option>
-          <option value="90">1 hour 30 minutes</option>
-          <option value="120">2 hours</option>
-        </select>
-      </label>
-
-      <button class="button button-primary" type="submit">
-        Confirm Booking
-      </button>
-      <p class="status-message" aria-live="polite"></p>
-    `;
-
-    const section = chargerGrid?.closest("section") || chargerGrid?.parentElement;
-    (section || document.body).appendChild(form);
-    form.scrollIntoView({ behavior: "smooth", block: "start" });
-
-    const dateInput = form.querySelector('[name="date"]');
-    const today = new Date();
-    const localToday = new Date(
-      today.getTime() - today.getTimezoneOffset() * 60000
-    ).toISOString().slice(0, 10);
-
-    dateInput.min = localToday;
-    dateInput.value = localToday;
-
-    form.addEventListener("submit", async event => {
-      event.preventDefault();
-
-      const button = form.querySelector('button[type="submit"]');
-      const message = form.querySelector(".status-message");
-      button.disabled = true;
-      button.textContent = "Booking...";
-
-      const values = new FormData(form);
-
-      try {
-        const booking = await apiRequest("/api/bookings", {
-          method: "POST",
-          body: JSON.stringify({
-            chargerId: charger.id,
-            customerName: values.get("customerName"),
-            date: values.get("date"),
-            time: values.get("time"),
-            duration: Number(values.get("duration"))
-          })
-        });
-
-        message.textContent = booking.estimatedCost != null
-          ? `Booking confirmed! Estimated charge: ₹${booking.estimatedCost}.`
-          : "Booking confirmed!";
-        showMessage("Your booking was confirmed.");
-      } catch (error) {
-        message.textContent = error.message;
-        showMessage(error.message, true);
-      } finally {
-        button.disabled = false;
-        button.textContent = "Confirm Booking";
-      }
-    });
+  if (!charger) {
+    showMessage("Please refresh the charger list and try again.", true);
+    return;
   }
+
+  document.querySelector("#bookingPanel")?.remove();
+
+  const form = document.createElement("form");
+  form.id = "bookingPanel";
+  form.className = "owner-form";
+  form.style.marginTop = "20px";
+
+  form.innerHTML = `
+    <h3>Book ${escapeHTML(charger.name)}</h3>
+
+    <label>Your name
+      <input name="customer" required maxlength="100" placeholder="Enter your name">
+    </label>
+
+    <label>Phone number
+      <input name="phone" type="tel" required maxlength="20" placeholder="Enter phone number">
+    </label>
+
+    <label>Car model
+      <input name="car" required maxlength="100" placeholder="Enter your EV model">
+    </label>
+
+    <label>Date
+      <input name="date" type="date" required>
+    </label>
+
+    <label>Start time
+      <input name="time" type="time" required>
+    </label>
+
+    <label>Charging duration
+      <select name="minutes" required>
+        <option value="30">30 minutes</option>
+        <option value="60">1 hour</option>
+        <option value="90">1 hour 30 minutes</option>
+        <option value="120">2 hours</option>
+      </select>
+    </label>
+
+    <label>Estimated energy required (kWh)
+      <input name="kwh" type="number" min="1" max="300" step="0.1" required placeholder="Example: 25">
+    </label>
+
+    <button class="button button-primary" type="submit">
+      Confirm Booking
+    </button>
+
+    <p class="status-message" aria-live="polite"></p>
+  `;
+
+  const section = chargerGrid?.closest("section") || chargerGrid?.parentElement;
+  (section || document.body).appendChild(form);
+  form.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  const dateInput = form.querySelector('[name="date"]');
+  const today = new Date();
+  const localToday = new Date(
+    today.getTime() - today.getTimezoneOffset() * 60000
+  ).toISOString().slice(0, 10);
+
+  dateInput.min = localToday;
+  dateInput.value = localToday;
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const button = form.querySelector('button[type="submit"]');
+    const message = form.querySelector(".status-message");
+
+    button.disabled = true;
+    button.textContent = "Booking...";
+
+    const values = new FormData(form);
+
+    try {
+      const result = await apiRequest("/api/bookings", {
+        method: "POST",
+        body: JSON.stringify({
+          chargerId: charger.id,
+          customer: values.get("customer"),
+          phone: values.get("phone"),
+          car: values.get("car"),
+          date: values.get("date"),
+          time: values.get("time"),
+          minutes: Number(values.get("minutes")),
+          kwh: Number(values.get("kwh"))
+        })
+      });
+
+      const savedBooking = result.booking;
+
+      message.style.color = "#16a34a";
+      message.textContent =
+        `✓ Booking Confirmed! Estimated cost: ₹${savedBooking.estimatedCost}. Booking ID: ${savedBooking.id}`;
+
+      showMessage("Your booking was successfully confirmed.");
+      button.textContent = "Booking Confirmed";
+    } catch (error) {
+      message.style.color = "#ff8585";
+      message.textContent = `Booking failed: ${error.message}`;
+      showMessage(error.message, true);
+
+      button.disabled = false;
+      button.textContent = "Confirm Booking";
+    }
+  });
+}
 
   function getDirections(chargerId) {
     const charger = allChargers.find(
